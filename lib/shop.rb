@@ -65,10 +65,7 @@ class Shop
 end
 
 class ShoppingBag
-  # extend Forwardable
   attr_reader :items
-
-  # def_delegator :@items, :include?
 
   def initialize
     @items = {}
@@ -91,12 +88,14 @@ class ProductTest < Test::Unit::TestCase
 
   def test_should_initialize_with_cost_and_code
     product = Product.new("Rose", "R12")
+
     assert_equal "Rose", product.name
-    assert_equal "R12", product.code
+    assert_equal "R12" , product.code
   end
 
   def test_should_return_true_if_code_is_corrrect
     product = Product.new("Rose", "R12")
+
     assert product.with_code?("R12")
   end
 
@@ -110,13 +109,13 @@ class BundleTest < Test::Unit::TestCase
   end
 
   def test_should_initialize_with_correct_parameters
-    assert_equal @bundle.size, 5
-    assert_equal @bundle.product, @rose
-    assert_equal @bundle.cost, 7.99
+    assert_equal 5     , @bundle.size
+    assert_equal @rose , @bundle.product
+    assert_equal 7.99  , @bundle.cost
   end
 
   def test_should_fetch_product_via_code
-    assert @bundle.has_product?("R12")
+    assert  @bundle.has_product?("R12")
     assert !@bundle.has_product?("R13")
   end
 
@@ -124,17 +123,21 @@ end
 
 class ShoppingBagTest < Test::Unit::TestCase
 
+  def setup
+    @bag = ShoppingBag.new
+  end
+
   def test_should_add_items
-    bag = ShoppingBag.new
-    bag.add_item(1, 20)
-    assert bag.include?(1)
+    @bag.add_item(1, 20)
+
+    assert @bag.include?(1)
   end
 
   def test_should_increment_quantity_if_item_already_exists
-    bag = ShoppingBag.new
-    bag.add_item(1, 20)
-    bag.add_item(1, 30)
-    assert_equal 50, bag.quantity_for(1)
+    @bag.add_item(1, 20)
+    @bag.add_item(1, 30)
+
+    assert_equal 50, @bag.quantity_for(1)
   end
 end
 
@@ -148,7 +151,7 @@ class ShopTest < Test::Unit::TestCase
   end
 
   def test_should_initialize_catalog_with_bundles
-    assert_equal @shop.size, 2
+    assert_equal 2, @shop.size
   end
 
   def test_should_look_up_bundles_by_code
