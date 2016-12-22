@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'test/unit'
 
 class Product
@@ -42,36 +43,47 @@ class Shop
   end
 
   def sell(code, quantity)
-    bag = ShoppingBag.new
-    bundles = lookup_bundle(code).sort_by {|b| b.size}
-    while quantity > 0
-      bundles.each do |b|
-        if quantity > b.size
-          bag.add_item(b, 1)
-          quantity =- b.size
-        end
+    bag     = ShoppingBag.new
+    bundles = lookup_bundle(code).sort {|a,b| a.size <=> b.size}.reverse
+    bundles.each do |b|
+      no_of_bundles = 0
+      while quantity >= b.size
+        no_of_bundles += 1
+        quantity      -= b.size
       end
+      bag.add_item b, no_of_bundles
     end
+    bag
   end
 
   def lookup_bundle(code)
-    @bundles.collect do |bundle|
-      bundle.has_product?(code)
-    end
+    @bundles.select do |bundle|
+      bundle if bundle.has_product?(code)
+    end.compact
   end
 
 end
 
 class ShoppingBag
-
+  # extend Forwardable
   attr_reader :items
 
+  # def_delegator :@items, :include?
+
   def initialize
-    @items = []
+    @items = {}
   end
 
   def add_item(bundle, quantity)
-    @items << {bundle => quantity}
+    @items[bundle] = quantity + (@items[bundle] || 0)
+  end
+
+  def quantity_for(item)
+     @items[item]
+  end
+
+  def include?(item)
+    @items.keys.include?(item)
   end
 end
 
@@ -110,13 +122,29 @@ class BundleTest < Test::Unit::TestCase
 
 end
 
+class ShoppingBagTest < Test::Unit::TestCase
+
+  def test_should_add_items
+    bag = ShoppingBag.new
+    bag.add_item(1, 20)
+    assert bag.include?(1)
+  end
+
+  def test_should_increment_quantity_if_item_already_exists
+    bag = ShoppingBag.new
+    bag.add_item(1, 20)
+    bag.add_item(1, 30)
+    assert_equal 50, bag.quantity_for(1)
+  end
+end
+
 class ShopTest < Test::Unit::TestCase
 
   def setup
     rose           = Product.new("Rose", "R12")
     @rose_bundle_1 = Bundle.new(5, rose, 7.99)
     @rose_bundle_2 = Bundle.new(10, rose, 12.99)
-    @shop = Shop.new([@rose_bundle_1, @rose_bundle_2])
+    @shop          = Shop.new([@rose_bundle_1, @rose_bundle_2])
   end
 
   def test_should_initialize_catalog_with_bundles
@@ -124,14 +152,15 @@ class ShopTest < Test::Unit::TestCase
   end
 
   def test_should_look_up_bundles_by_code
-    assert_equal @shop.lookup_bundle("R12"), [@rose_bundle_1, @rose_bundle_2]
+    assert_equal [@rose_bundle_1, @rose_bundle_2], @shop.lookup_bundle("R12")
+    assert_equal [], @shop.lookup_bundle("R13")
   end
 
   def test_sell_same_flowers
-    bag = @shop.sell("R10", 15)
+    bag = @shop.sell("R12", 15)
     assert_equal bag.items.size, 2
-    assert bag.include?(@rose_bundle_2)
-    assert bag.include?(@rose_bundle_1)
+    assert bag.include?(@rose_bundle_2), "bundle not found"
+    assert bag.include?(@rose_bundle_1), "bundle not found"
   end
 
 end
