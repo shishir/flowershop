@@ -47,12 +47,10 @@ class Shop
     bag     = ShoppingBag.new
     bundles = lookup_bundle(code).sort {|a,b| a.size <=> b.size}.reverse
     bundles.each do |b|
-      no_of_bundles = 0
       while quantity >= b.size
-        no_of_bundles += 1
+        bag.add_item b
         quantity      -= b.size
       end
-      bag.add_item b, no_of_bundles
     end
     bag
   end
@@ -72,8 +70,8 @@ class ShoppingBag
     @items = {}
   end
 
-  def add_item(bundle, quantity)
-    @items[bundle] = quantity + (@items[bundle] || 0)
+  def add_item(bundle)
+    @items[bundle] = 1 + (@items[bundle] || 0)
   end
 
   def quantity_for(item)
@@ -129,16 +127,16 @@ class ShoppingBagTest < Test::Unit::TestCase
   end
 
   def test_should_add_items
-    @bag.add_item(1, 20)
+    @bag.add_item(1)
 
     assert @bag.include?(1)
   end
 
   def test_should_increment_quantity_if_item_already_exists
-    @bag.add_item(1, 20)
-    @bag.add_item(1, 30)
+    @bag.add_item(1)
+    @bag.add_item(1)
 
-    assert_equal 50, @bag.quantity_for(1)
+    assert_equal 2, @bag.quantity_for(1)
   end
 end
 
@@ -169,7 +167,7 @@ class ShopTest < Test::Unit::TestCase
 
   def test_shop_should_initialize_with_the_available_inventory
     shop = Shop.new
-    assert_not_nil shop.bundles
+    assert !shop.bundles.empty?, "Shop should be initialized with pre-defined catalog"
   end
 
 end
