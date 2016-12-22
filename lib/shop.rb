@@ -40,7 +40,7 @@ class Shop
   def_delegator :@bundles, :size
 
   def initialize(bundles = [])
-    @bundles = bundles
+    @bundles = bundles.empty? ? load_catalog : bundles
   end
 
   def sell(code, quantity)
@@ -59,6 +59,20 @@ class Shop
     @bundles.select do |bundle|
       bundle if bundle.has_product?(code)
     end.compact
+  end
+
+  private
+  def load_catalog
+    [
+      Bundle.new(5  , Product.new("Roses"  , "R12") , 7.99),
+      Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99),
+      Bundle.new(3  , Product.new("Lilies" , "L09") , 9.95),
+      Bundle.new(6  , Product.new("Lilies" , "L09") , 16.95),
+      Bundle.new(9  , Product.new("Lilies" , "L09") , 24.95),
+      Bundle.new(3  , Product.new("Tulips" , "T58") , 5.95),
+      Bundle.new(5  , Product.new("Tulips" , "T58") , 9.95),
+      Bundle.new(9  , Product.new("Tulips" , "T58") , 16.95),
+    ]
   end
 
 end
@@ -168,6 +182,7 @@ class ShopTest < Test::Unit::TestCase
   def test_shop_should_initialize_with_the_available_inventory
     shop = Shop.new
     assert !shop.bundles.empty?, "Shop should be initialized with pre-defined catalog"
+    assert_equal 8, shop.bundles.size
   end
 
 end
