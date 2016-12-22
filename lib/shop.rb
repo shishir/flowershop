@@ -33,13 +33,14 @@ class Bundle
 end
 
 class Shop
+  extend Forwardable
 
-  def initialize(bundles)
+  attr_reader :bundles
+
+  def_delegator :@bundles, :size
+
+  def initialize(bundles = [])
     @bundles = bundles
-  end
-
-  def size
-    @bundles.size
   end
 
   def sell(code, quantity)
@@ -164,6 +165,11 @@ class ShopTest < Test::Unit::TestCase
     assert_equal bag.items.size, 2
     assert bag.include?(@rose_bundle_2), "bundle not found"
     assert bag.include?(@rose_bundle_1), "bundle not found"
+  end
+
+  def test_shop_should_initialize_with_the_available_inventory
+    shop = Shop.new
+    assert_not_nil shop.bundles
   end
 
 end
