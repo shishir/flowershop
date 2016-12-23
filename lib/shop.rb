@@ -14,6 +14,15 @@ class Product
     @code == code
   end
 
+  def == (other)
+    @name == other.name && @code == other.code
+  end
+
+  alias eql? ==
+
+  def hash
+    @name.hash ^ @code.hash
+  end
 end
 
 class Bundle
@@ -30,21 +39,31 @@ class Bundle
     product.with_code?(code)
   end
 
+  def ==(other)
+    product == other.product && size == other.size && cost == other.cost
+  end
+
+  alias eql? ==
+
+  def hash
+    @product.hash ^ @size.hash ^ @cost.hash
+  end
+
 end
 
 class Shop
   extend Forwardable
 
-  attr_reader :bundles
+  attr_reader :bundles, :bag
 
   def_delegator :@bundles, :size
 
   def initialize(bundles = [])
     @bundles = bundles.empty? ? load_catalog : bundles
+    @bag     = ShoppingBag.new
   end
 
   def sell(code, quantity)
-    bag     = ShoppingBag.new
     bundles = lookup_bundle(code).sort {|a,b| a.size <=> b.size}.reverse
     bundles.each do |b|
       while quantity >= b.size
@@ -52,7 +71,6 @@ class Shop
         quantity      -= b.size
       end
     end
-    bag
   end
 
   def lookup_bundle(code)
@@ -89,7 +107,7 @@ class ShoppingBag
   end
 
   def quantity_for(item)
-     @items[item]
+    @items[item]
   end
 
   def include?(item)
@@ -132,6 +150,11 @@ class BundleTest < Test::Unit::TestCase
     assert !@bundle.has_product?("R13")
   end
 
+  def test_equality
+    assert_equal Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99), Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99)
+    assert_equal Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99).hash, Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99).hash
+  end
+
 end
 
 class ShoppingBagTest < Test::Unit::TestCase
@@ -152,6 +175,12 @@ class ShoppingBagTest < Test::Unit::TestCase
 
     assert_equal 2, @bag.quantity_for(1)
   end
+
+  def test_should_able_to_tell_quantity_for_an_item
+    @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+    assert_equal 1, @bag.quantity_for(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+  end
+
 end
 
 class ShopTest < Test::Unit::TestCase
@@ -173,7 +202,8 @@ class ShopTest < Test::Unit::TestCase
   end
 
   def test_sell_same_flowers
-    bag = @shop.sell("R12", 15)
+    @shop.sell("R12", 15)
+    bag = @shop.bag
     assert_equal bag.items.size, 2
     assert bag.include?(@rose_bundle_2), "bundle not found"
     assert bag.include?(@rose_bundle_1), "bundle not found"
@@ -183,6 +213,31 @@ class ShopTest < Test::Unit::TestCase
     shop = Shop.new
     assert !shop.bundles.empty?, "Shop should be initialized with pre-defined catalog"
     assert_equal 8, shop.bundles.size
+  end
+
+  def test_shop_to_sell_multiple_items
+    shop = Shop.new
+    shop.sell("R12", 10)
+    shop.sell("L09", 15)
+    shop.sell("T58", 13)
+
+    bag = shop.bag
+
+    assert bag.include?(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99)), "should contain 10x1 bundle roses"
+    assert_equal 1, bag.quantity_for(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+
+    assert bag.include?(Bundle.new(9  , Product.new("Lilies"  , "L09") , 24.95)), "should contain 9x1 bundle lilies"
+    assert_equal 1, bag.quantity_for(Bundle.new(9  , Product.new("Lilies"  , "L09") , 24.95))
+
+    assert bag.include?(Bundle.new(6  , Product.new("Lilies"  , "L09") , 16.95))
+    assert_equal 1, bag.quantity_for(Bundle.new(6  , Product.new("Lilies"  , "L09") , 16.95))
+
+    assert bag.include?(Bundle.new(5  , Product.new("Tulips"  , "T58") , 9.95)), "should contain 5x2 bundle tulips"
+    assert_equal 2, bag.quantity_for(Bundle.new(5  , Product.new("Tulips"  , "T58") , 9.95))
+
+    assert bag.include?(Bundle.new(3  , Product.new("Tulips"  , "T58") , 5.95))
+    assert_equal 1, bag.quantity_for(Bundle.new(3  , Product.new("Tulips"  , "T58") , 5.95))
+
   end
 
 end
