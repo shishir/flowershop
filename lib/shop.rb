@@ -26,8 +26,11 @@ class Product
 end
 
 class Bundle
+  extend Forwardable
 
   attr_reader :size, :product, :cost
+
+  def_delegator :@product, :code
 
   def initialize(size, product, cost)
     @size    = size
@@ -49,6 +52,10 @@ class Bundle
     @product.hash ^ @size.hash ^ @cost.hash
   end
 
+  def to_s
+    "#{product.code}-#{@size}"
+  end
+
 end
 
 class Shop
@@ -65,11 +72,9 @@ class Shop
 
   def sell(code, quantity)
     bundles = lookup_bundle(code).sort {|a,b| a.size <=> b.size}.reverse
-    bundles.each do |b|
-      while quantity >= b.size
-        bag.add_item b
-        quantity      -= b.size
-      end
+    while assign_bundles(bundles, @bag, quantity) == false && bundles.size > 0
+      bundles = bundles - [bundles.first]
+      @bag.remove_items_by_code(code)
     end
   end
 
@@ -80,6 +85,21 @@ class Shop
   end
 
   private
+
+  def assign_bundles(bundles, bag, quantity)
+    return true if quantity == 0
+    return false if quantity > 0 && bundles.empty?
+
+    b = bundles.first
+
+    if quantity >= b.size
+      bag.add_item(b)
+      assign_bundles(bundles, bag, quantity - b.size)
+    else
+      assign_bundles(bundles - [b], bag, quantity)
+    end
+  end
+
   def load_catalog
     [
       Bundle.new(5  , Product.new("Roses"  , "R12") , 7.99),
@@ -107,11 +127,22 @@ class ShoppingBag
   end
 
   def quantity_for(item)
-    @items[item]
+    @items[item] || 0
+  end
+
+  def remove_items_by_code(code)
+    @items.reject! {|i| i.code == code}
   end
 
   def include?(item)
     @items.keys.include?(item)
+  end
+
+  def to_s
+    @items.inject("") do |str, item|
+      str += item.to_s + " "
+      str
+    end
   end
 end
 
@@ -179,6 +210,18 @@ class ShoppingBagTest < Test::Unit::TestCase
   def test_should_able_to_tell_quantity_for_an_item
     @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
     assert_equal 1, @bag.quantity_for(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+  end
+
+  def test_remove_items
+    @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+    @bag.add_item(Bundle.new(4 , Product.new("Roses"  , "R12") , 12.99))
+    assert_equal 1, @bag.quantity_for(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+    assert_equal 1, @bag.quantity_for(Bundle.new(4 , Product.new("Roses"  , "R12") , 12.99))
+
+    @bag.remove_items_by_code("R12")
+
+    assert_equal 0, @bag.quantity_for(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+    assert_equal 0, @bag.quantity_for(Bundle.new(4 , Product.new("Roses"  , "R12") , 12.99))
   end
 
 end
