@@ -39,7 +39,7 @@ module FlowerShop
       output = codes.inject("") do |str, code|
           str += self.total_quantity_by_code(code).to_s + " "
           str += code + " "
-          str += self.total_cost_by_code(code).to_s + "\n\t"
+          str += sprintf( "%0.02f", self.total_cost_by_code(code)) + "\n\t"
           list_str = self.items_by_code(code).collect do |item|
                         "#{quantity_for(item)} X #{item.to_s}"
                       end
