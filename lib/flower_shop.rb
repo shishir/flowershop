@@ -8,7 +8,7 @@ module FlowerShop
   def self.handle_customer
     $/ = "\n\n"
 
-    shop = Shop.new
+    shop  = Shop.new
     input = gets
 
     rows = input.split("\n")
