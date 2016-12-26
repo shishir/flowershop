@@ -33,7 +33,7 @@ module FlowerShop
       assert_equal 8, shop.bundles.size
     end
 
-    def test_sell_when_bundles_can_be_composed_in_more_than_one_way
+    def test_should_minimize_bundles_when_bundles_can_be_composed_in_more_than_one_way
       shop = Shop.new([Bundle.new(3, Product.new("Rose", "R12") , 7.99), Bundle.new(6, Product.new("Rose", "R12") , 7.99), Bundle.new(9, Product.new("Rose", "R12") , 7.99)])
 
       shop.sell("R12", 15)
@@ -45,7 +45,7 @@ module FlowerShop
       assert !bag.include?(Bundle.new(3, Product.new("Rose", "R12") , 7.99))
     end
 
-    def test_sell_when_quantity_cannot_be_composed_in_bundles
+    def test_should_not_sell_when_quantity_cannot_be_composed_in_bundles
       shop = Shop.new([Bundle.new(3, Product.new("Rose", "R12") , 7.99), Bundle.new(6, Product.new("Rose", "R12") , 7.99), Bundle.new(9, Product.new("Rose", "R12") , 7.99)])
 
       shop.sell("R12", 20)

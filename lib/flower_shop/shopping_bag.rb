@@ -1,5 +1,6 @@
 module FlowerShop
   class ShoppingBag
+
     attr_reader :items
 
     def initialize

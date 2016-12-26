@@ -28,7 +28,7 @@ module FlowerShop
     private
 
     def assign_bundles(bundles, bag, quantity)
-      return true if quantity == 0
+      return true  if quantity == 0
       return false if quantity > 0 && bundles.empty?
 
       b = bundles.first

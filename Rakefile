@@ -1,5 +1,4 @@
 require 'rake/testtask'
-require 'rake/clean'
 
 desc "Run tests"
 Rake::TestTask.new(:test) do |t|
