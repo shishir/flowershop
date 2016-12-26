@@ -38,10 +38,11 @@ module FlowerShop
     end
 
     def test_should_calculate_quantity_for_items_by_code
-      @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
-      @bag.add_item(Bundle.new(4 , Product.new("Roses"  , "R12") , 2.99))
+      @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 10.99))
+      @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 10.99))
+      @bag.add_item(Bundle.new(4  , Product.new("Roses"  , "R12") , 2.00))
 
-      assert_equal 15.98, @bag.total_cost_by_code("R12")
+      assert_equal 23.98, @bag.total_cost_by_code("R12")
     end
 
     def test_should_return_items_by_code

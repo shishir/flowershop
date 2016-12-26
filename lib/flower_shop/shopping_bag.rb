@@ -15,7 +15,7 @@ module FlowerShop
     end
 
     def total_cost_by_code(code)
-      @items.keys.inject(0) {|total_cost, item| total_cost += item.cost if item.code == code; total_cost}
+      @items.keys.inject(0) {|total_cost, item| total_cost += item.cost * @items[item] if item.code == code; total_cost}
     end
 
     def total_quantity_by_code(code)
