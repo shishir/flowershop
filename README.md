@@ -14,6 +14,8 @@
 
 - Assumes the input is always one of Roses(R12), Lilies(L09) or Tulips(T58). This can be changed in the *load_catalog* method. Currently, there is not way to take catalog input from the command line.
 
+- If the requested amount cannot be composed in bundles, no bundles are sold. The quantity is zero.
+
 
 # Run Code
 

@@ -33,8 +33,29 @@ module FlowerShop
       assert_equal 8, shop.bundles.size
     end
 
+    def test_sell_when_bundles_can_be_composed_in_more_than_one_way
+      shop = Shop.new([Bundle.new(3, Product.new("Rose", "R12") , 7.99), Bundle.new(6, Product.new("Rose", "R12") , 7.99), Bundle.new(9, Product.new("Rose", "R12") , 7.99)])
+
+      shop.sell("R12", 15)
+      bag = shop.bag
+
+      assert_equal 15, bag.total_quantity_by_code("R12")
+      assert bag.include?(Bundle.new(9, Product.new("Rose", "R12") , 7.99))
+      assert bag.include?(Bundle.new(6, Product.new("Rose", "R12") , 7.99))
+      assert !bag.include?(Bundle.new(3, Product.new("Rose", "R12") , 7.99))
+    end
+
+    def test_sell_when_quantity_cannot_be_composed_in_bundles
+      shop = Shop.new([Bundle.new(3, Product.new("Rose", "R12") , 7.99), Bundle.new(6, Product.new("Rose", "R12") , 7.99), Bundle.new(9, Product.new("Rose", "R12") , 7.99)])
+
+      shop.sell("R12", 20)
+      bag = shop.bag
+
+      assert_equal 0, bag.total_quantity_by_code("R12")
+    end
+
     def test_shop_to_sell_multiple_items
-      shop = Shop.new
+      shop = Shop.new()
 
       shop.sell("R12", 10)
       shop.sell("L09", 15)
@@ -58,6 +79,8 @@ module FlowerShop
       assert_equal 1, bag.quantity_for(Bundle.new(3  , Product.new("Tulips"  , "T58") , 5.95))
 
     end
+
+
 
   end
 end
