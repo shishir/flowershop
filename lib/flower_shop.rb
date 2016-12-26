@@ -19,5 +19,3 @@ module FlowerShop
     puts shop.bag.to_s
   end
 end
-
-FlowerShop.handle_customer
