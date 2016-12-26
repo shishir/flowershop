@@ -37,5 +37,31 @@ module FlowerShop
       assert_equal 0, @bag.quantity_for(Bundle.new(4 , Product.new("Roses"  , "R12") , 12.99))
     end
 
+    def test_should_calculate_quantity_for_items_by_code
+      @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+      @bag.add_item(Bundle.new(4 , Product.new("Roses"  , "R12") , 2.99))
+
+      assert_equal 15.98, @bag.total_cost_by_code("R12")
+    end
+
+    def test_should_return_items_by_code
+      @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+      @bag.add_item(Bundle.new(4 , Product.new("Roses"  , "R12") , 2.99))
+      @bag.add_item(Bundle.new(4 , Product.new("Lilies"  , "L09") , 3.99))
+
+      assert_equal 2, @bag.items_by_code("R12").size
+      assert_equal 1, @bag.items_by_code("L09").size
+    end
+
+    def test_should_return_total_quatity_by_code
+      @bag.add_item(Bundle.new(10 , Product.new("Roses"  , "R12") , 12.99))
+      @bag.add_item(Bundle.new(4 , Product.new("Roses"  , "R12") , 2.99))
+      @bag.add_item(Bundle.new(4 , Product.new("Roses"  , "R12") , 2.99))
+      @bag.add_item(Bundle.new(4 , Product.new("Lilies"  , "L09") , 3.99))
+
+      assert_equal 18, @bag.total_quantity_by_code("R12")
+      assert_equal 4, @bag.total_quantity_by_code("L09")
+    end
+
   end
 end

@@ -27,7 +27,7 @@ module FlowerShop
     end
 
     def to_s
-      "#{product.code}-#{@size}"
+      "#{@size} #{product.code} #{cost}"
     end
   end
 end

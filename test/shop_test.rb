@@ -35,6 +35,7 @@ module FlowerShop
 
     def test_shop_to_sell_multiple_items
       shop = Shop.new
+
       shop.sell("R12", 10)
       shop.sell("L09", 15)
       shop.sell("T58", 13)
