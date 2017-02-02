@@ -1,23 +1,61 @@
-# Assumptions/Constraints
+# Problem Statement
 
-- Built/tested against ruby 1.9.3.
+Context:
 
-- Assumes bundler, rake and test-unit gems are available to the ruby. *test-unit* is included in ruby 1.9.3. It was one of the reason why I picked up ruby 1.9.3. If you wish to test against higher versions of ruby, you would have to install test-unit. You can edit the Gemfile and do bundle install.
+A flower shop used to base the price of their flowers on an item by item cost. So if a
+customer ordered 10 roses then they would be charged 10x the cost of single rose. The
+flower shop has decided to start selling their flowers in bundles and charging the customer
+on a per bundle basis. So if the shop sold roses in bundles of 5 and 10 and a customer
+ordered 15 they would get a bundle of 10 and a bundle of 5.
 
-- The structure of code loosely represents that of a Rubygem. But since it is more of a script than a library. I did not bundle it as a ruby gem.
+The flower shop currently sells the following products:
 
-- Input on Standard I/O is terminated when *<ENTER>* key is pressed *twice*.
+Name          | Code                 |  Bundle
 
-- *ShopTest::test_shop_to_sell_multiple_items* is the functional test. The input mentioned in the problem statement.
+Roses         | R12                  |  5 @ $6.99
+                                        10 @ $12.99
 
-- No Validation added.
+Lilies        | L09                  |  3 @ $9.95
+                                        6 @ $16.95
+                                        9 @ $24.95
 
-- Assumes the input is always one of Roses(R12), Lilies(L09) or Tulips(T58). This can be changed in the *load_catalog* method. Currently, there is not way to take catalog input from the command line.
+Tulips        | T58                  |  3 @ $5.95
+                                        5 @ $9.95
+                                        9 @ $16.99
 
-- If the requested amount cannot be composed in bundles, no bundles are sold. The quantity is zero.
+# Task:
 
-- If code is incorrect, input is ignored.
+Given a customer order you are required to determine the cost and bundle breakdown for
+each product. To save on shipping space each order should contain the minimal number
+of bundles.
 
+# Input:
+======
+
+Each order has a series of lines with each line containing the number of items followed by
+the product code
+
+An example input:
+
+10 R12
+15 L09
+13 T58
+
+Output:
+
+A successfully passing test(s) that demonstrates the following output: (The format of the
+output is not important)
+
+10 R12 $12.99
+       1 x 10 $12.99
+
+15 L09 $41.90
+       1 x 9 $24.95
+       1 x 6 $16.95
+
+13 T58 $25.85
+       2 x 5 $9.95
+       1 x 3 $5.95
 
 # Run Code
 
